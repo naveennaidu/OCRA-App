@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "874709552652",
+    "firebase_url": "https://oral-cavity-detection.firebaseio.com",
+    "project_id": "oral-cavity-detection",
+    "storage_bucket": "oral-cavity-detection.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:874709552652:android:83b035dce7358f62",
+        "android_client_info": {
+          "package_name": "com.naveennaidu.opc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "874709552652-4qcgh2qcna6nor0bkd7dls1faqagqdu5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvMzyKLC4LdW_yHViqtBWjK5_Fp9oHdOs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
