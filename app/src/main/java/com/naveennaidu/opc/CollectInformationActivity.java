@@ -177,7 +177,7 @@ public class CollectInformationActivity extends AppCompatActivity {
                 stringBuilder3.append("_");
                 stringBuilder3.append(resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB");
 
-                uploadImage(stringBuilder2, stringBuilder3.toString());
+//                uploadImage(stringBuilder2, stringBuilder3.toString());
 
                 if (nameText.getText().toString().matches("") || ageText.getText().toString().matches("")) {
                     Toast.makeText(getApplicationContext(), "Name or Age is empty", Toast.LENGTH_SHORT).show();
@@ -288,104 +288,67 @@ public class CollectInformationActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        // If there's an upload in progress, save the reference so you can query it later
-        if (storageReferenceProfilePic != null) {
-            outState.putString("reference", storageReferenceProfilePic.toString());
-        }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-
-        // If there was an upload in progress, get its reference and create a new StorageReference
-        final String stringRef = savedInstanceState.getString("reference");
-        if (stringRef == null) {
-            return;
-        }
-        storageReferenceProfilePic = FirebaseStorage.getInstance().getReferenceFromUrl(stringRef);
-
-        // Find all UploadTasks under this StorageReference (in this example, there should be one)
-        List<UploadTask> tasks = storageReferenceProfilePic.getActiveUploadTasks();
-        if (tasks.size() > 0) {
-            // Get the task monitoring the upload
-            UploadTask task = tasks.get(0);
-
-            // Add new listeners to the task using an Activity scope
-            task.addOnSuccessListener(this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot state) {
-                    Log.e("restore", "yes");
-                    //handleSuccess(state); //call a user defined function to handle the event.
-                }
-            });
-        }
-    }
-    private void uploadImage(String mainFolder, String patientFolder) {
-        storageReferenceProfilePic = FirebaseStorage.getInstance().getReference();
-        for (int i = 0; i < this.imagesUri.size(); i++) {
-            String name = mainFolder + "/" + patientFolder + "/" + imageName.get(i) + ".jpg";
-            final StorageReference ref = storageReferenceProfilePic.child(name);
-            UploadTask uploadTask = ref.putFile(imagesUri.get(i), new StorageMetadata.Builder().build(), sessionUri);
-
-            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    progressDialog.dismiss();
-                }
-            })
-            .addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    progressDialog.dismiss();
-                }
-            })
-            .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-
-                    //displaying percentage in progress dialog
-                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
-                    sessionUri = taskSnapshot.getUploadSessionUri();
-                    if (sessionUri != null && !saved) {
-                        saved = true;
-                        // A persisted session has begun with the server.
-                        // Save this to persistent storage in case the process dies.
-                    }
-                }
-            });
-
-            Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                @Override
-                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                    if (!task.isSuccessful()) {
-                        throw task.getException();
-                    }
-
-                    // Continue with the task to get the download URL
-                    return ref.getDownloadUrl();
-                }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    if (task.isSuccessful()) {
-                        Uri downloadUri = task.getResult();
-                        uploadedImageUri.add(downloadUri);
-                        Log.e("URL", ""+uploadedImageUri);
-                    } else {
-                        // Handle failures
-                        // ...
-                    }
-                }
-            });
-
-        }
-    }
+//    private void uploadImage(String mainFolder, String patientFolder) {
+//        storageReferenceProfilePic = FirebaseStorage.getInstance().getReference();
+//        for (int i = 0; i < this.imagesUri.size(); i++) {
+//            String name = mainFolder + "/" + patientFolder + "/" + imageName.get(i) + ".jpg";
+//            final StorageReference ref = storageReferenceProfilePic.child(name);
+//            UploadTask uploadTask = ref.putFile(imagesUri.get(i), new StorageMetadata.Builder().build(), sessionUri);
+//
+//            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                @Override
+//                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                    progressDialog.dismiss();
+//                }
+//            })
+//            .addOnFailureListener(new OnFailureListener() {
+//                @Override
+//                public void onFailure(@NonNull Exception e) {
+//                    progressDialog.dismiss();
+//                }
+//            })
+//            .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+//                @Override
+//                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+//                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+//
+//                    //displaying percentage in progress dialog
+//                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
+//                    sessionUri = taskSnapshot.getUploadSessionUri();
+//                    if (sessionUri != null && !saved) {
+//                        saved = true;
+//                        // A persisted session has begun with the server.
+//                        // Save this to persistent storage in case the process dies.
+//                    }
+//                }
+//            });
+//
+//            Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+//                @Override
+//                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+//                    if (!task.isSuccessful()) {
+//                        throw task.getException();
+//                    }
+//
+//                    // Continue with the task to get the download URL
+//                    return ref.getDownloadUrl();
+//                }
+//            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+//                @Override
+//                public void onComplete(@NonNull Task<Uri> task) {
+//                    if (task.isSuccessful()) {
+//                        Uri downloadUri = task.getResult();
+//                        uploadedImageUri.add(downloadUri);
+//                        Log.e("URL", ""+uploadedImageUri);
+//                    } else {
+//                        // Handle failures
+//                        // ...
+//                    }
+//                }
+//            });
+//
+//        }
+//    }
 
     private File createImageFile(String name, String age, String gender) throws IOException {
         String currentDateandTime = new SimpleDateFormat("dd-MM-yyyy:HH:mm:ss").format(new Date());

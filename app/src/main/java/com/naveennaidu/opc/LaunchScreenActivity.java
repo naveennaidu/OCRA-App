@@ -22,6 +22,7 @@ public class LaunchScreenActivity extends AppCompatActivity {
     Button newPatient;
     Button oldPatient;
     Button saveButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
