@@ -3,11 +3,13 @@ package com.naveennaidu.opc;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.arch.persistence.room.Room;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -80,6 +82,14 @@ public class CollectInformationActivity extends AppCompatActivity {
     Boolean saved = false;
     Uri sessionUri;
     StorageReference storageReferenceProfilePic;
+    String searchUid;
+    ArrayList<Integer> uids = new ArrayList<>();
+
+    ArrayAdapter gen;
+    ArrayAdapter dia;
+    ArrayAdapter re;
+    String imageUris;
+    AppDatabase db;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -90,6 +100,10 @@ public class CollectInformationActivity extends AppCompatActivity {
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
 
+        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "patients-database")
+                .fallbackToDestructiveMigration()
+                .build();
+
         nameText = findViewById(R.id.name);
         ageText = findViewById(R.id.age);
         cameraButton = findViewById(R.id.cameraButton);
@@ -99,18 +113,57 @@ public class CollectInformationActivity extends AppCompatActivity {
         hospital = getIntent().getStringExtra("hospital");
         doctor = getIntent().getStringExtra("doctor");
 
+        if (getIntent().getExtras().containsKey("uid")){
+            searchUid = getIntent().getStringExtra("uid");
+            uids.add(Integer.parseInt(searchUid));
+            final Integer[] arrUid = uids.toArray(new Integer[0]);
+
+//            new asyncData().execute(arrUid);
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    List<Patient> patient = db.patientDao().loadAllByIds(arrUid);
+                    nameText.setText(patient.get(0).getName());
+                    ageText.setText(patient.get(0).getAge());
+                    int genderPos = gen.getPosition(patient.get(0).getGender());
+                    genderSpinner.setSelection(genderPos);
+
+                    if (dia.getPosition(patient.get(0).getDiagnosis()) != -1){
+                        int diaPos = dia.getPosition(patient.get(0).getDiagnosis());
+                        diagnosisSpinner.setSelection(diaPos);
+                    } else {
+                        diagnosisSpinner.setSelection(4);
+                        otherText.setText(patient.get(0).getDiagnosis());
+                    }
+                    int rePos = re.getPosition(patient.get(0).getResult());
+                    resultSpinner.setSelection(rePos);
+                    imageUris = patient.get(0).getImageUrls();
+                    Log.e("urls", imageUris);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            addImageView(inHorizontalScrollView, Uri.parse(imageUris.substring(1, imageUris.length()-1)));
+                        }
+                    });
+                }
+            }).start();
+//            addImageView(inHorizontalScrollView, Uri.parse(imageUris.substring(1, imageUris.length()-1)));
+        }
+
+
         genderSpinner = findViewById(R.id.genderSpinner);
-        ArrayAdapter gen = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, genderList);
+        gen = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, genderList);
         gen.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         genderSpinner.setAdapter(gen);
 
         diagnosisSpinner = findViewById(R.id.diagnosisSpinner);
-        ArrayAdapter dia = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, diagnosisList);
+        dia = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, diagnosisList);
         dia.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         diagnosisSpinner.setAdapter(dia);
 
         resultSpinner = findViewById(R.id.resultSpinner);
-        ArrayAdapter re = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, resultList);
+        re = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, resultList);
         re.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         resultSpinner.setAdapter(re);
 
@@ -122,7 +175,6 @@ public class CollectInformationActivity extends AppCompatActivity {
                 requestMultiplePermissions();
             }
         }
-
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -159,105 +211,53 @@ public class CollectInformationActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("OPC_");
-                stringBuilder.append(hospital);
-                stringBuilder.append("_");
-                stringBuilder.append(doctor);
-                String stringBuilder2 = stringBuilder.toString();
+//                String mainFolderName = "/OPC_" + hospital + "_" + doctor;
+//                String subFolderName = nameText.getText().toString() + "_" + ageText.getText().toString() + "_"
+//                        + genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F" + "_"
+//                        + (otherText.getText().toString().matches("") ? diagnosisSpinner.getSelectedItem() : otherText.getText()).toString().replaceAll("\\s+", "")
+//                        + "_" + resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB" ;
 
-                StringBuilder stringBuilder3 = new StringBuilder();
-                stringBuilder3.append(nameText.getText().toString());
-                stringBuilder3.append("_");
-                stringBuilder3.append(ageText.getText().toString());
-                stringBuilder3.append("_");
-                stringBuilder3.append(genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F");
-                stringBuilder3.append("_");
-                stringBuilder3.append((otherText.getText().toString().matches("") ? diagnosisSpinner.getSelectedItem() : otherText.getText()).toString().replaceAll("\\s+", ""));
-                stringBuilder3.append("_");
-                stringBuilder3.append(resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB");
-
-//                uploadImage(stringBuilder2, stringBuilder3.toString());
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Patient patient =new Patient();
+                        patient.setName(nameText.getText().toString());
+                        patient.setAge(ageText.getText().toString());
+                        patient.setGender(genderSpinner.getSelectedItem().toString());
+                        patient.setImageUrls(imagesUri.toString());
+                        patient.setDiagnosis(diagnosisSpinner.getSelectedItem().toString() == "Other" ? otherText.getText().toString() : diagnosisSpinner.getSelectedItem().toString());
+                        patient.setResult(resultSpinner.getSelectedItem().toString());
+                        db.patientDao().insert(patient);
+                    }
+                }) .start();
 
                 if (nameText.getText().toString().matches("") || ageText.getText().toString().matches("")) {
                     Toast.makeText(getApplicationContext(), "Name or Age is empty", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                stringBuilder3 = new StringBuilder();
-                stringBuilder3.append(Environment.getExternalStorageDirectory());
-                stringBuilder3.append("/OPC_");
-                stringBuilder3.append(hospital);
-                stringBuilder3.append("_");
-                stringBuilder3.append(doctor);
-                stringBuilder3.append("/");
-                stringBuilder3.append(nameText.getText().toString());
-                stringBuilder3.append("_");
-                stringBuilder3.append(ageText.getText().toString());
-                stringBuilder3.append("_");
-                stringBuilder3.append(genderSpinner.getSelectedItem().toString());
-                File direct = new File(stringBuilder3.toString());
-                if (direct.exists()) {
-                    StringBuilder stringBuilder4;
-                    if (otherText.getText().toString().matches("")) {
-                        stringBuilder4 = new StringBuilder();
-                        stringBuilder4.append(Environment.getExternalStorageDirectory());
-                        stringBuilder4.append("/OPC_");
-                        stringBuilder4.append(hospital);
-                        stringBuilder4.append("_");
-                        stringBuilder4.append(doctor);
-                        stringBuilder4.append("/");
-                        stringBuilder4.append(nameText.getText().toString());
-                        stringBuilder4.append("_");
-                        stringBuilder4.append(ageText.getText().toString());
-                        stringBuilder4.append("_");
-                        stringBuilder4.append(genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F");
-                        stringBuilder4.append("_");
-                        stringBuilder4.append(diagnosisSpinner.getSelectedItem().toString().replaceAll("\\s+", ""));
-                        stringBuilder4.append("_");
-                        stringBuilder4.append(resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB");
-                        reDirect = new File(stringBuilder4.toString());
-                        stringBuilder3 = new StringBuilder();
-                        stringBuilder3.append(nameText.getText().toString());
-                        stringBuilder3.append("_");
-                        stringBuilder3.append(ageText.getText().toString());
-                        stringBuilder3.append("_");
-                        stringBuilder3.append(genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F");
-                        stringBuilder3.append("_");
-                        stringBuilder3.append(diagnosisSpinner.getSelectedItem().toString().replaceAll("\\s+", ""));
-                        stringBuilder3.append("_");
-                        stringBuilder3.append(resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB");
-                        patientFolder = stringBuilder3.toString();
-                    } else {
-                        stringBuilder4 = new StringBuilder();
-                        stringBuilder4.append(Environment.getExternalStorageDirectory());
-                        stringBuilder4.append("/OPC_");
-                        stringBuilder4.append(hospital);
-                        stringBuilder4.append("_");
-                        stringBuilder4.append(doctor);
-                        stringBuilder4.append("/");
-                        stringBuilder4.append(nameText.getText().toString());
-                        stringBuilder4.append("_");
-                        stringBuilder4.append(ageText.getText().toString());
-                        stringBuilder4.append("_");
-                        stringBuilder4.append(genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F");
-                        stringBuilder4.append("_");
-                        stringBuilder4.append(otherText.getText().toString().replaceAll("\\s+", ""));
-                        stringBuilder4.append("_");
-                        stringBuilder4.append(resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB");
-                        reDirect = new File(stringBuilder4.toString());
-                        stringBuilder3 = new StringBuilder();
-                        stringBuilder3.append(nameText.getText().toString());
-                        stringBuilder3.append("_");
-                        stringBuilder3.append(ageText.getText().toString());
-                        stringBuilder3.append("_");
-                        stringBuilder3.append(genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F");
-                        stringBuilder3.append("_");
-                        stringBuilder3.append(otherText.getText().toString().replaceAll("\\s+", ""));
-                        stringBuilder3.append("_");
-                        stringBuilder3.append(resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB");
-                        patientFolder = stringBuilder3.toString();
+                } else {
+                    String fileName = Environment.getExternalStorageDirectory() + "/OPC_" + hospital + "_" + doctor + "/" + nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderSpinner.getSelectedItem().toString();
+                    File direct = new File(fileName);
+                    Log.e("direct", otherText.getText().toString().matches("")+"");
+                    if (direct.exists()) {
+                        if (otherText.getText().toString().matches("")) {
+                            String fullPath = Environment.getExternalStorageDirectory() + "/OPC_" + hospital + "_" + doctor + "/" + nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F" + "_" + diagnosisSpinner.getSelectedItem().toString().replaceAll("\\s+", "") + "_" + resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB";
+                            Log.e("fullpath", fullPath);
+                            reDirect = new File(fullPath);
+//                            patientFolder = nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F"
+//                                    + "_" + diagnosisSpinner.getSelectedItem().toString().replaceAll("\\s+", "") + "_"
+//                                    + resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB";
+                        } else {
+                            String fullPath = Environment.getExternalStorageDirectory() + "/OPC_" + hospital + "_" + doctor + "/" + nameText.getText().toString()
+                                    + "_" + ageText.getText().toString() + "_" + genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F"
+                                    + "_" + diagnosisSpinner.getSelectedItem().toString().replaceAll("\\s+", "") + "_"
+                                    + resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB";
+
+                            reDirect = new File(fullPath);
+                            patientFolder = nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F"
+                                    + "_" + diagnosisSpinner.getSelectedItem().toString().replaceAll("\\s+", "") + "_"
+                                    + resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB";
+                        }
+                        direct.renameTo(reDirect);
                     }
-                    direct.renameTo(reDirect);
                 }
                 Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_SHORT).show();
                 nameText.setText("");
@@ -287,6 +287,32 @@ public class CollectInformationActivity extends AppCompatActivity {
         });
 
     }
+
+//    private class asyncData extends AsyncTask<Integer[], Void, Void>{
+//        @Override
+//        protected Void doInBackground(Integer[]... arrUid) {
+//            List<Patient> patient = db.patientDao().loadAllByIds(arrUid[0]);
+//            nameText.setText(patient.get(0).getName());
+//            ageText.setText(patient.get(0).getAge());
+//            int genderPos = gen.getPosition(patient.get(0).getGender());
+//            genderSpinner.setSelection(genderPos);
+//
+//            if (dia.getPosition(patient.get(0).getDiagnosis()) != -1){
+//                int diaPos = dia.getPosition(patient.get(0).getDiagnosis());
+//                diagnosisSpinner.setSelection(diaPos);
+//            } else {
+//                diagnosisSpinner.setSelection(4);
+//                otherText.setText(patient.get(0).getDiagnosis());
+//            }
+//            int rePos = re.getPosition(patient.get(0).getResult());
+//            resultSpinner.setSelection(rePos);
+//            imageUris = patient.get(0).getImageUrls();
+//            Log.e("urls", imageUris);
+//            addImageView(inHorizontalScrollView, Uri.parse(imageUris.substring(1, imageUris.length()-1)));
+//            return null;
+//        }
+//
+//    }
 
 //    private void uploadImage(String mainFolder, String patientFolder) {
 //        storageReferenceProfilePic = FirebaseStorage.getInstance().getReference();

@@ -23,6 +23,9 @@ public class LaunchScreenActivity extends AppCompatActivity {
     Button oldPatient;
     Button saveButton;
 
+    EditText uidText;
+    Button searchButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +39,11 @@ public class LaunchScreenActivity extends AppCompatActivity {
         saveButton = findViewById(R.id.saveButton);
         changeNameButton = findViewById(R.id.changeButton);
         changeNameButton.setVisibility(View.GONE);
+
+        uidText = findViewById(R.id.uidText);
+        searchButton = findViewById(R.id.searchButton);
+        uidText.setVisibility(View.GONE);
+        searchButton.setVisibility(View.GONE);
 
         SharedPreferences preferences = getSharedPreferences("LOGIN", 0);
         hosp = preferences.getString("hosp", "");
@@ -71,20 +79,28 @@ public class LaunchScreenActivity extends AppCompatActivity {
         oldPatient.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (hosp.matches("") || doc.matches("")) {
-                    Toast.makeText(getApplicationContext(), "Hospital or Doctor name is empty", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Intent goToNewPatient = new Intent(LaunchScreenActivity.this, CollectInformationActivity.class);
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("");
-                stringBuilder.append(hosp);
-                goToNewPatient.putExtra("hospital", stringBuilder.toString());
-                stringBuilder = new StringBuilder();
-                stringBuilder.append("");
-                stringBuilder.append(doc);
-                goToNewPatient.putExtra("doctor", stringBuilder.toString());
-                startActivity(goToNewPatient);
+                uidText.setVisibility(View.VISIBLE);
+                searchButton.setVisibility(View.VISIBLE);
+                oldPatient.setVisibility(View.GONE);
+            }
+        });
+
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String uid = uidText.getText().toString();
+
+                Intent goToOldPatient = new Intent(LaunchScreenActivity.this, CollectInformationActivity.class);
+                goToOldPatient.putExtra("hospital", hosp);
+                goToOldPatient.putExtra("doctor", doc);
+                goToOldPatient.putExtra("uid", uid);
+                startActivity(goToOldPatient);
+
+                uidText.setText("");
+                uidText.setVisibility(View.GONE);
+                searchButton.setVisibility(View.GONE);
+                oldPatient.setVisibility(View.VISIBLE);
+
             }
         });
 
