@@ -28,6 +28,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".CollectInformationActivity"/>
+        <activity android:name=".ImageAnnotationActivity"/>
     </application>
 
 </manifest>

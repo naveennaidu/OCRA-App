@@ -117,9 +117,6 @@ public class CollectInformationActivity extends AppCompatActivity {
             searchUid = getIntent().getStringExtra("uid");
             uids.add(Integer.parseInt(searchUid));
             final Integer[] arrUid = uids.toArray(new Integer[0]);
-
-//            new asyncData().execute(arrUid);
-
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -139,18 +136,23 @@ public class CollectInformationActivity extends AppCompatActivity {
                     int rePos = re.getPosition(patient.get(0).getResult());
                     resultSpinner.setSelection(rePos);
                     imageUris = patient.get(0).getImageUrls();
-                    Log.e("urls", imageUris);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            addImageView(inHorizontalScrollView, Uri.parse(imageUris.substring(1, imageUris.length()-1)));
-                        }
-                    });
+                    String subimageUris = imageUris.substring(1, imageUris.length()-1);
+                    final String[] allImageUri = subimageUris.split(",");
+                    for(int i=0; i<allImageUri.length;i++){
+                        imagesUri.add(Uri.parse(allImageUri[i]));
+                        final int finalI = i;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.e("image uri", allImageUri[finalI]);
+                                addImageView(inHorizontalScrollView, Uri.parse(allImageUri[finalI]));
+                            }
+                        });
+                    }
+
                 }
             }).start();
-//            addImageView(inHorizontalScrollView, Uri.parse(imageUris.substring(1, imageUris.length()-1)));
         }
-
 
         genderSpinner = findViewById(R.id.genderSpinner);
         gen = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, genderList);
@@ -216,7 +218,7 @@ public class CollectInformationActivity extends AppCompatActivity {
 //                        + genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F" + "_"
 //                        + (otherText.getText().toString().matches("") ? diagnosisSpinner.getSelectedItem() : otherText.getText()).toString().replaceAll("\\s+", "")
 //                        + "_" + resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB" ;
-
+                Log.e("Image Uri", ""+imageUris);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -277,6 +279,8 @@ public class CollectInformationActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i == 4) {
                     otherText.setVisibility(View.VISIBLE);
+                } else {
+                    otherText.setVisibility(View.GONE);
                 }
             }
 
@@ -287,32 +291,6 @@ public class CollectInformationActivity extends AppCompatActivity {
         });
 
     }
-
-//    private class asyncData extends AsyncTask<Integer[], Void, Void>{
-//        @Override
-//        protected Void doInBackground(Integer[]... arrUid) {
-//            List<Patient> patient = db.patientDao().loadAllByIds(arrUid[0]);
-//            nameText.setText(patient.get(0).getName());
-//            ageText.setText(patient.get(0).getAge());
-//            int genderPos = gen.getPosition(patient.get(0).getGender());
-//            genderSpinner.setSelection(genderPos);
-//
-//            if (dia.getPosition(patient.get(0).getDiagnosis()) != -1){
-//                int diaPos = dia.getPosition(patient.get(0).getDiagnosis());
-//                diagnosisSpinner.setSelection(diaPos);
-//            } else {
-//                diagnosisSpinner.setSelection(4);
-//                otherText.setText(patient.get(0).getDiagnosis());
-//            }
-//            int rePos = re.getPosition(patient.get(0).getResult());
-//            resultSpinner.setSelection(rePos);
-//            imageUris = patient.get(0).getImageUrls();
-//            Log.e("urls", imageUris);
-//            addImageView(inHorizontalScrollView, Uri.parse(imageUris.substring(1, imageUris.length()-1)));
-//            return null;
-//        }
-//
-//    }
 
 //    private void uploadImage(String mainFolder, String patientFolder) {
 //        storageReferenceProfilePic = FirebaseStorage.getInstance().getReference();
@@ -435,7 +413,10 @@ public class CollectInformationActivity extends AppCompatActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1 && photoUri != null) {
-            addImageView(inHorizontalScrollView, photoUri);
+            Intent goToAnnotation = new Intent(CollectInformationActivity.this, ImageAnnotationActivity.class);
+            goToAnnotation.putExtra("imageUri", ""+photoUri);
+            startActivity(goToAnnotation);
+//            addImageView(inHorizontalScrollView, photoUri);
         }
     }
 
