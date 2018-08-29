@@ -173,6 +173,7 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
             case MotionEvent.ACTION_DOWN:
                 downx = motionEvent.getX();
                 downy = motionEvent.getY();
+                Log.e("down points", ""+downx + "," + downy);
                 break;
             case MotionEvent.ACTION_MOVE:
                 upx = motionEvent.getX();
@@ -181,13 +182,14 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
                 annotationImageView.invalidate();
                 downx = upx;
                 downy = upy;
+                Log.e("move points", ""+upx+","+upy);
                 break;
             case MotionEvent.ACTION_UP:
 //                upx = motionEvent.getX();
 //                upy = motionEvent.getY();
 //                canvas.drawLine(downx, downy, upx, upy, paint);
 //                annotationImageView.invalidate();
-                paint.setColor(Color.GREEN);
+//                paint.setColor(Color.GREEN);
                 break;
             case MotionEvent.ACTION_CANCEL:
                 break;
