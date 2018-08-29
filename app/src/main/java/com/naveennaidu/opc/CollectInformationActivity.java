@@ -415,8 +415,13 @@ public class CollectInformationActivity extends AppCompatActivity {
         if (requestCode == 1 && photoUri != null) {
             Intent goToAnnotation = new Intent(CollectInformationActivity.this, ImageAnnotationActivity.class);
             goToAnnotation.putExtra("imageUri", ""+photoUri);
-            startActivity(goToAnnotation);
+            startActivityForResult(goToAnnotation, 100);
 //            addImageView(inHorizontalScrollView, photoUri);
+        }
+
+        if (requestCode == 100 && resultCode == RESULT_OK){
+//            String test = data.getStringExtra("image");
+            addImageView(inHorizontalScrollView, photoUri);
         }
     }
 

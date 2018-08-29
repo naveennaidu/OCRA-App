@@ -5,15 +5,63 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <!--<include-->
+        <!--android:id="@+id/app_bar"-->
+        <!--layout="@layout/app_bar"/>-->
+
     <ImageView
         android:id="@+id/annotationImageView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:srcCompat="@android:color/darker_gray" />
 
-    <Button
-        android:id="@+id/saveButton"
+    <!--<RadioGroup-->
+        <!--android:id="@+id/toolbar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="horizontal">-->
+
+        <!--<RadioButton-->
+            <!--android:id="@+id/drawButton"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginLeft="10dp"-->
+            <!--android:layout_marginRight="10dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="Draw" />-->
+
+        <!--<RadioButton-->
+            <!--android:id="@+id/eraseButton"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginLeft="10dp"-->
+            <!--android:layout_marginRight="10dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="Erase" />-->
+    <!--</RadioGroup>-->
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Save" />
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/undoButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:text="UNDO ALL" />
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:text="Save" />
+    </LinearLayout>
+
 </LinearLayout>
