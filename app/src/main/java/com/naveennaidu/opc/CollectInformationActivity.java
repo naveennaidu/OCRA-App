@@ -399,12 +399,9 @@ public class CollectInformationActivity extends AppCompatActivity {
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Intent intent = new Intent("android.intent.action.VIEW");
-//                intent.setDataAndType(photoUri, "image/*");
-//                startActivity(intent);
-                Intent goToAnnotation = new Intent(CollectInformationActivity.this, ImageAnnotationActivity.class);
-                goToAnnotation.putExtra("imageUri", ""+photoUri);
-                startActivityForResult(goToAnnotation, 100);
+                Intent intent = new Intent("android.intent.action.VIEW");
+                intent.setDataAndType(photoUri, "image/*");
+                startActivity(intent);
 
             }
         });
