@@ -1,6 +1,7 @@
 package com.naveennaidu.opc;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,10 +13,13 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -30,6 +34,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -70,6 +75,9 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
     Uri photoUri;
     ArrayList<Point> drawPoints = new ArrayList<>();
 
+    int MAX_HEIGHT = 1024;
+    int MAX_WIDTH = 1024;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,7 +116,6 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
                 maxValY = 0;
 
                 for (int i=0; i<drawPoints.size(); i++){
-                    Log.e("point", ""+drawPoints.get(i).x);
                     if (drawPoints.get(i).x > maxValX) {
                         maxValX = drawPoints.get(i).x;
                     }
@@ -135,6 +142,8 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
             }
         } else if (view == undoButton) {
             initDrawCanvas();
+            drawPoints.clear();
+            path.reset();
         }
     }
 
@@ -170,17 +179,26 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
 
     private void initDrawCanvas(){
         photoUri = Uri.parse(getIntent().getStringExtra("imageUri"));
+
         try {
             BitmapFactory.Options bmpFactoryOptions = new BitmapFactory.Options();
             bmpFactoryOptions.inJustDecodeBounds = true;
-            bmp = BitmapFactory.decodeStream(getContentResolver().openInputStream(photoUri), null, bmpFactoryOptions);
+            InputStream inputStream = getContentResolver().openInputStream(photoUri);
+            BitmapFactory.decodeStream(inputStream, null, bmpFactoryOptions);
+            inputStream.close();
+
+            bmpFactoryOptions.inSampleSize = calculateInSampleSize(bmpFactoryOptions, MAX_WIDTH, MAX_HEIGHT);
 
             bmpFactoryOptions.inJustDecodeBounds = false;
-            bmp = BitmapFactory.decodeStream(getContentResolver().openInputStream(photoUri), null, bmpFactoryOptions);
+            inputStream = getContentResolver().openInputStream(photoUri);
+            bmp = BitmapFactory.decodeStream(inputStream, null, bmpFactoryOptions);
+
+            bmp = rotateImageIfRequired(bmp, photoUri);
 
             alteredBitmap = Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(), bmp.getConfig());
+
+
             canvas = new Canvas(alteredBitmap);
-            Log.e("canvas", "" + canvas.getWidth() + "-" + bmp.getWidth() + "," + canvas.getHeight() + "-" + bmp.getHeight());
             paint = new Paint();
             paint.setColor(Color.BLUE);
             paint.setAntiAlias(true);
@@ -269,5 +287,54 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
             o.printStackTrace();
         }
         return resultMaskBitmap;
+    }
+
+    private static int calculateInSampleSize(BitmapFactory.Options options,
+                                             int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            final int heightRatio = Math.round((float) height / (float) reqHeight);
+            final int widthRatio = Math.round((float) width / (float) reqWidth);
+
+            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+
+            final float totalPixels = width * height;
+            final float totalReqPixelsCap = reqWidth * reqHeight * 2;
+
+            while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixelsCap) {
+                inSampleSize++;
+            }
+        }
+        return inSampleSize;
+    }
+
+
+    private static Bitmap rotateImageIfRequired(Bitmap img, Uri selectedImage) throws IOException {
+
+        ExifInterface ei = new ExifInterface(selectedImage.getPath());
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+        Log.e("orientation", ""+orientation);
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return rotateImage(img, 90);
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                return rotateImage(img, 180);
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                return rotateImage(img, 270);
+            default:
+                return img;
+        }
+    }
+
+    private static Bitmap rotateImage(Bitmap img, int degree) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
+        img.recycle();
+        return rotatedImg;
     }
 }
