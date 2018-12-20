@@ -40,6 +40,7 @@ public class LaunchScreenActivity extends AppCompatActivity {
         changeNameButton = findViewById(R.id.changeButton);
         changeNameButton.setVisibility(View.GONE);
 
+        oldPatient.setVisibility(View.GONE);
         uidText = findViewById(R.id.uidText);
         searchButton = findViewById(R.id.searchButton);
         uidText.setVisibility(View.GONE);

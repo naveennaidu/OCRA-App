@@ -29,12 +29,19 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -74,6 +81,8 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
 
     Uri photoUri;
     ArrayList<Point> drawPoints = new ArrayList<>();
+    ArrayList<Integer> coordinatesX = new ArrayList<>();
+    ArrayList<Integer> coordinatesY = new ArrayList<>();
 
     int MAX_HEIGHT = 1024;
     int MAX_WIDTH = 1024;
@@ -112,29 +121,50 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
                     e.printStackTrace();
                 }
 
-                maxValX = 0;
-                maxValY = 0;
+//                maxValX = 0;
+//                maxValY = 0;
+//
+//                for (int i=0; i<drawPoints.size(); i++){
+//                    if (drawPoints.get(i).x > maxValX) {
+//                        maxValX = drawPoints.get(i).x;
+//                    }
+//                    if (drawPoints.get(i).y > maxValY) {
+//                        maxValY = drawPoints.get(i).y;
+//                    }
+//                }
+//                minValX = maxValX;
+//                minValY = maxValY;
+//                for (int i=0; i<drawPoints.size(); i++){
+//                    if (drawPoints.get(i).x < minValX){
+//                        minValX = drawPoints.get(i).x;
+//                    }
+//                    if (drawPoints.get(i).y < minValY){
+//                        minValY = drawPoints.get(i).y;
+//                    }
+//                }
+//
+//                performCrop(photoUri);
 
-                for (int i=0; i<drawPoints.size(); i++){
-                    if (drawPoints.get(i).x > maxValX) {
-                        maxValX = drawPoints.get(i).x;
-                    }
-                    if (drawPoints.get(i).y > maxValY) {
-                        maxValY = drawPoints.get(i).y;
-                    }
-                }
-                minValX = maxValX;
-                minValY = maxValY;
-                for (int i=0; i<drawPoints.size(); i++){
-                    if (drawPoints.get(i).x < minValX){
-                        minValX = drawPoints.get(i).x;
-                    }
-                    if (drawPoints.get(i).y < minValY){
-                        minValY = drawPoints.get(i).y;
-                    }
+                String photoUriString = photoUri.toString();
+                Log.e("photo name", photoUriString);
+                String[] splitUri = photoUriString.split("/");
+
+                for(int i=0; i<drawPoints.size(); i++){
+                    coordinatesX.add(drawPoints.get(i).x);
+                    coordinatesY.add(drawPoints.get(i).y);
                 }
 
-                performCrop(photoUri);
+                JSONObject json = writeJSON(splitUri[8].substring(0, splitUri[8].length()-4), coordinatesX, coordinatesY);
+                try {
+                    Writer output = null;
+                    File newfile = new File(Environment.getExternalStorageDirectory() + "/" + splitUri[6] + "/" + splitUri[7]+ "/" + "test" + ".json");
+                    output = new BufferedWriter(new FileWriter(newfile));
+                    output.write(json.toString());
+                    output.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
 
                 Intent intent = new Intent();
                 setResult(RESULT_OK, intent);
@@ -147,6 +177,18 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
         }
     }
 
+    public JSONObject writeJSON(String name, ArrayList<Integer> cooridinatesX, ArrayList<Integer> cooridinatesY){
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("name", name);
+            jsonObject.put("X", cooridinatesX);
+            jsonObject.put("Y", cooridinatesY);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
+
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         int action = motionEvent.getAction();
@@ -155,7 +197,6 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
                 downx = motionEvent.getX();
                 downy = motionEvent.getY();
                 path.moveTo(downx, downy);
-                Log.e("down points", ""+downx + "," + downy);
                 break;
             case MotionEvent.ACTION_MOVE:
                 upx = motionEvent.getX();
@@ -176,6 +217,10 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
         }
         return true;
     }
+
+
+
+
 
     private void initDrawCanvas(){
         photoUri = Uri.parse(getIntent().getStringExtra("imageUri"));
@@ -199,6 +244,7 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
 
 
             canvas = new Canvas(alteredBitmap);
+
             paint = new Paint();
             paint.setColor(Color.BLUE);
             paint.setAntiAlias(true);
@@ -207,8 +253,8 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeJoin(Paint.Join.ROUND);
 
-            matrix = new Matrix();
-            canvas.drawBitmap(bmp, matrix, paint);
+//            matrix = new Matrix();
+            canvas.drawBitmap(bmp, 0, 0, paint);
 
             annotationImageView.setImageBitmap(alteredBitmap);
             annotationImageView.setOnTouchListener(this);

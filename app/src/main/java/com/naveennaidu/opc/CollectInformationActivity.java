@@ -212,52 +212,19 @@ public class CollectInformationActivity extends AppCompatActivity {
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-//                String mainFolderName = "/OPC_" + hospital + "_" + doctor;
-//                String subFolderName = nameText.getText().toString() + "_" + ageText.getText().toString() + "_"
-//                        + genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F" + "_"
-//                        + (otherText.getText().toString().matches("") ? diagnosisSpinner.getSelectedItem() : otherText.getText()).toString().replaceAll("\\s+", "")
-//                        + "_" + resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB" ;
-                Log.e("Image Uri", ""+imageUris);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Patient patient =new Patient();
-                        patient.setName(nameText.getText().toString());
-                        patient.setAge(ageText.getText().toString());
-                        patient.setGender(genderSpinner.getSelectedItem().toString());
-                        patient.setImageUrls(imagesUri.toString());
-                        patient.setDiagnosis(diagnosisSpinner.getSelectedItem().toString() == "Other" ? otherText.getText().toString() : diagnosisSpinner.getSelectedItem().toString());
-                        patient.setResult(resultSpinner.getSelectedItem().toString());
-                        db.patientDao().insert(patient);
-                    }
-                }) .start();
+                String genderMini = genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F";
+                String resultMini = resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB";
+                String mainFolderName = "/OPC_" + hospital + "_" + doctor;
+                String subFolderName = nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderMini + "_" + (otherText.getText().toString().matches("") ? diagnosisSpinner.getSelectedItem() : otherText.getText()).toString().replaceAll("\\s+", "") + "_" + resultMini;
 
                 if (nameText.getText().toString().matches("") || ageText.getText().toString().matches("")) {
                     Toast.makeText(getApplicationContext(), "Name or Age is empty", Toast.LENGTH_SHORT).show();
                 } else {
-                    String fileName = Environment.getExternalStorageDirectory() + "/OPC_" + hospital + "_" + doctor + "/" + nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderSpinner.getSelectedItem().toString();
+                    String fileName = Environment.getExternalStorageDirectory() + mainFolderName + "/" + nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderSpinner.getSelectedItem().toString();
                     File direct = new File(fileName);
-                    Log.e("direct", otherText.getText().toString().matches("")+"");
                     if (direct.exists()) {
-                        if (otherText.getText().toString().matches("")) {
-                            String fullPath = Environment.getExternalStorageDirectory() + "/OPC_" + hospital + "_" + doctor + "/" + nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F" + "_" + diagnosisSpinner.getSelectedItem().toString().replaceAll("\\s+", "") + "_" + resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB";
-                            Log.e("fullpath", fullPath);
-                            reDirect = new File(fullPath);
-//                            patientFolder = nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F"
-//                                    + "_" + diagnosisSpinner.getSelectedItem().toString().replaceAll("\\s+", "") + "_"
-//                                    + resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB";
-                        } else {
-                            String fullPath = Environment.getExternalStorageDirectory() + "/OPC_" + hospital + "_" + doctor + "/" + nameText.getText().toString()
-                                    + "_" + ageText.getText().toString() + "_" + genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F"
-                                    + "_" + diagnosisSpinner.getSelectedItem().toString().replaceAll("\\s+", "") + "_"
-                                    + resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB";
-
-                            reDirect = new File(fullPath);
-                            patientFolder = nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F"
-                                    + "_" + diagnosisSpinner.getSelectedItem().toString().replaceAll("\\s+", "") + "_"
-                                    + resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB";
-                        }
+                        String fullPath = Environment.getExternalStorageDirectory() + mainFolderName + "/" + subFolderName;
+                        reDirect = new File(fullPath);
                         direct.renameTo(reDirect);
                     }
                 }
