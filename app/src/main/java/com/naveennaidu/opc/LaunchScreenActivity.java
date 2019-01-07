@@ -22,6 +22,7 @@ public class LaunchScreenActivity extends AppCompatActivity {
     Button newPatient;
     Button oldPatient;
     Button saveButton;
+    Button detectButton;
 
     EditText uidText;
     Button searchButton;
@@ -45,6 +46,8 @@ public class LaunchScreenActivity extends AppCompatActivity {
         searchButton = findViewById(R.id.searchButton);
         uidText.setVisibility(View.GONE);
         searchButton.setVisibility(View.GONE);
+
+        detectButton = findViewById(R.id.detection_buttton);
 
         SharedPreferences preferences = getSharedPreferences("LOGIN", 0);
         hosp = preferences.getString("hosp", "");
@@ -152,6 +155,14 @@ public class LaunchScreenActivity extends AppCompatActivity {
                 editor.putString("doc", stringBuilder.toString());
                 editor.apply();
                 ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(doctorName.getWindowToken(), 0);
+            }
+        });
+
+        detectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent goToDetect = new Intent(LaunchScreenActivity.this, DetectionScreenActivity.class);
+                startActivity(goToDetect);
             }
         });
     }

@@ -89,4 +89,11 @@
         android:layout_marginRight="60dp"
         android:layout_marginTop="10dp"
         android:text="save" />
+
+    <Button
+        android:id="@+id/detection_buttton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Detect" />
 </LinearLayout>
