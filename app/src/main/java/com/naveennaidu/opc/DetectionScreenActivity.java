@@ -37,6 +37,7 @@ public class DetectionScreenActivity extends AppCompatActivity {
     TextView resultsTextView;
     Button predictButton;
     ProgressBar progressBar;
+    Uri resultUri;
 
     private static final int OPEN_CAMERA_CODE = 1;
     Uri selectedImage;
@@ -64,7 +65,9 @@ public class DetectionScreenActivity extends AppCompatActivity {
         predictButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if (resultUri != null) {
+                    Toast.makeText(getApplicationContext(), "Please Upload the Image", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -92,8 +95,8 @@ public class DetectionScreenActivity extends AppCompatActivity {
 
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
-            if (resultCode == RESULT_OK) {
-                Uri resultUri = result.getUri();
+            if (resultCode == RESULT_OK && result != null) {
+                resultUri = result.getUri();
                 cancerImageView.setImageURI(resultUri);
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
