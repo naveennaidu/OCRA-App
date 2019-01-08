@@ -177,6 +177,7 @@ public class CollectInformationActivity extends AppCompatActivity {
                 requestMultiplePermissions();
             }
         }
+
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
