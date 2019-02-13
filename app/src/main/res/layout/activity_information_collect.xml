@@ -26,8 +26,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp"
             android:ems="10"
             android:hint="Age"
             android:inputType="number" />
@@ -50,6 +50,18 @@
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp" />
 
+        <EditText
+            android:id="@+id/patient_phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:ems="10"
+            android:hint="Phone Number"
+            android:inputType="phone" />
+
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -70,51 +82,12 @@
             app:srcCompat="@android:drawable/ic_menu_camera" />
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/patientID"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
-            android:text="Diagnosis"
+            android:layout_margin="10dp"
+            android:text="Patient ID:"
             android:textSize="24sp" />
-
-        <Spinner
-            android:id="@+id/diagnosisSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp" />
-
-        <EditText
-            android:id="@+id/otherEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginStart="5dp"
-            android:ems="10"
-            android:hint="Other"
-            android:inputType="textPersonName" />
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
-            android:text="Result"
-            android:textSize="24sp" />
-
-        <Spinner
-            android:id="@+id/resultSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp" />
 
         <Button
             android:id="@+id/submitButton"
