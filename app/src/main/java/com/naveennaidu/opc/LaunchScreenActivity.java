@@ -68,14 +68,9 @@ public class LaunchScreenActivity extends AppCompatActivity {
                     return;
                 }
                 Intent goToNewPatient = new Intent(LaunchScreenActivity.this, CollectInformationActivity.class);
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("");
-                stringBuilder.append(hosp);
-                goToNewPatient.putExtra("hospital", stringBuilder.toString());
-                stringBuilder = new StringBuilder();
-                stringBuilder.append("");
-                stringBuilder.append(doc);
-                goToNewPatient.putExtra("doctor", stringBuilder.toString());
+
+                goToNewPatient.putExtra("hospital", hosp);
+                goToNewPatient.putExtra("doctor", doc);
                 startActivity(goToNewPatient);
             }
         });
@@ -114,15 +109,11 @@ public class LaunchScreenActivity extends AppCompatActivity {
                 hospitalNameText = hospitalName.getText().toString();
                 doctorNameText = doctorName.getText().toString();
                 SharedPreferences.Editor editor = getSharedPreferences("LOGIN", 0).edit();
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("");
-                stringBuilder.append(hospitalNameText);
-                editor.putString("hosp", stringBuilder.toString());
-                stringBuilder = new StringBuilder();
-                stringBuilder.append("");
-                stringBuilder.append(doctorNameText);
-                editor.putString("doc", stringBuilder.toString());
+
+                editor.putString("hosp", hospitalNameText);
+                editor.putString("doc", doctorNameText);
                 editor.apply();
+
                 hosp = hospitalNameText;
                 doc = doctorNameText;
                 hospitalName.setVisibility(View.GONE);
@@ -145,14 +136,9 @@ public class LaunchScreenActivity extends AppCompatActivity {
                 hospitalNameText = hospitalName.getText().toString();
                 doctorNameText = doctorName.getText().toString();
                 SharedPreferences.Editor editor = getSharedPreferences("LOGIN", 0).edit();
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("");
-                stringBuilder.append(hospitalNameText);
-                editor.putString("hosp", stringBuilder.toString());
-                stringBuilder = new StringBuilder();
-                stringBuilder.append("");
-                stringBuilder.append(doctorNameText);
-                editor.putString("doc", stringBuilder.toString());
+
+                editor.putString("hosp", hospitalNameText);
+                editor.putString("doc", doctorNameText);
                 editor.apply();
                 ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(doctorName.getWindowToken(), 0);
             }

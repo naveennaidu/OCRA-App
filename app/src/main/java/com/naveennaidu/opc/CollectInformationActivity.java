@@ -326,29 +326,13 @@ public class CollectInformationActivity extends AppCompatActivity {
         String currentDateandTime = new SimpleDateFormat("dd-MM-yyyy:HH:mm:ss").format(new Date());
         String timeStamp = name + "_" + age + "_" + gender + "_" + currentDateandTime;
         imageName.add(timeStamp);
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(Environment.getExternalStorageDirectory());
-        stringBuilder.append("/OPC_");
-        stringBuilder.append(hospital);
-        stringBuilder.append("_");
-        stringBuilder.append(doctor);
-        File direct = new File(stringBuilder.toString());
+
+        File direct = new File(Environment.getExternalStorageDirectory() + "/OPC_" + hospital + "_" + doctor);
         if (!direct.exists()) {
             direct.mkdir();
         }
-        StringBuilder stringBuilder2 = new StringBuilder();
-        stringBuilder2.append(Environment.getExternalStorageDirectory());
-        stringBuilder2.append("/OPC_");
-        stringBuilder2.append(hospital);
-        stringBuilder2.append("_");
-        stringBuilder2.append(doctor);
-        stringBuilder2.append("/");
-        stringBuilder2.append(name);
-        stringBuilder2.append("_");
-        stringBuilder2.append(age);
-        stringBuilder2.append("_");
-        stringBuilder2.append(gender);
-        File subFolder = new File(stringBuilder2.toString());
+
+        File subFolder = new File(Environment.getExternalStorageDirectory() + "/OPC_" + hospital + "_" + doctor + "/" + name + "_" + age + "_" + gender);
         if (!subFolder.exists()) {
             subFolder.mkdir();
         }
