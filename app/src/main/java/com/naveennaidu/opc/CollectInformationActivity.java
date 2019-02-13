@@ -3,7 +3,6 @@ package com.naveennaidu.opc;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.arch.persistence.room.Room;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -89,7 +88,6 @@ public class CollectInformationActivity extends AppCompatActivity {
     ArrayAdapter dia;
     ArrayAdapter re;
     String imageUris;
-    AppDatabase db;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -100,9 +98,6 @@ public class CollectInformationActivity extends AppCompatActivity {
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
 
-        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "patients-database")
-                .fallbackToDestructiveMigration()
-                .build();
 
         nameText = findViewById(R.id.name);
         ageText = findViewById(R.id.age);
@@ -117,41 +112,6 @@ public class CollectInformationActivity extends AppCompatActivity {
             searchUid = getIntent().getStringExtra("uid");
             uids.add(Integer.parseInt(searchUid));
             final Integer[] arrUid = uids.toArray(new Integer[0]);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    List<Patient> patient = db.patientDao().loadAllByIds(arrUid);
-                    nameText.setText(patient.get(0).getName());
-                    ageText.setText(patient.get(0).getAge());
-                    int genderPos = gen.getPosition(patient.get(0).getGender());
-                    genderSpinner.setSelection(genderPos);
-
-                    if (dia.getPosition(patient.get(0).getDiagnosis()) != -1){
-                        int diaPos = dia.getPosition(patient.get(0).getDiagnosis());
-                        diagnosisSpinner.setSelection(diaPos);
-                    } else {
-                        diagnosisSpinner.setSelection(4);
-                        otherText.setText(patient.get(0).getDiagnosis());
-                    }
-                    int rePos = re.getPosition(patient.get(0).getResult());
-                    resultSpinner.setSelection(rePos);
-                    imageUris = patient.get(0).getImageUrls();
-                    String subimageUris = imageUris.substring(1, imageUris.length()-1);
-                    final String[] allImageUri = subimageUris.split(",");
-                    for(int i=0; i<allImageUri.length;i++){
-                        imagesUri.add(Uri.parse(allImageUri[i]));
-                        final int finalI = i;
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Log.e("image uri", allImageUri[finalI]);
-                                addImageView(inHorizontalScrollView, Uri.parse(allImageUri[finalI]));
-                            }
-                        });
-                    }
-
-                }
-            }).start();
         }
 
         genderSpinner = findViewById(R.id.genderSpinner);
