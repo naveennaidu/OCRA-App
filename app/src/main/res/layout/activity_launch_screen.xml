@@ -23,24 +23,7 @@
         android:layout_marginTop="10dp"
         android:orientation="horizontal"
         android:paddingLeft="20dp"
-        android:paddingRight="20dp">
-
-        <EditText
-            android:id="@+id/uidText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ems="10"
-            android:hint="UID"
-            android:inputType="textPersonName" />
-
-        <Button
-            android:id="@+id/searchButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Search" />
-    </LinearLayout>
+        android:paddingRight="20dp"/>
 
     <Button
         android:id="@+id/oldPatient"
