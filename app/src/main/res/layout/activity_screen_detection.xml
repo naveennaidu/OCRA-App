@@ -46,7 +46,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:paddingLeft="20dp"
-        android:text="Malignant with prob:"
+        android:text="Pre-Malignant with prob:"
         android:textSize="18sp" />
 
     <RelativeLayout

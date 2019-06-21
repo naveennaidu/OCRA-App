@@ -3,7 +3,6 @@ package com.naveennaidu.opc;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.arch.persistence.room.Room;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -20,6 +19,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,6 +33,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
@@ -39,6 +41,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
@@ -51,45 +57,47 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CollectInformationActivity extends AppCompatActivity {
 
-    private static final int CAMERA_REQUEST = 1;
+    EditText nameText;
     EditText ageText;
     ImageButton cameraButton;
-    ArrayList<String> diagnosisList = new ArrayList(Arrays.asList(new String[]{"Leukoplakia", "Erythroplakia", "Lichen Planus", "Traumatic Ulcer", "Other", "None"}));
-    Spinner diagnosisSpinner;
-    String doctor;
-    Uri file;
     ArrayList<String> genderList = new ArrayList(Arrays.asList(new String[]{"Male", "Female"}));
     Spinner genderSpinner;
+    EditText phoneText;
+
+    String doctor;
+    Uri file;
     String hospital;
+
     ArrayList<String> imageName = new ArrayList();
     ArrayList<Uri> imagesUri = new ArrayList();
     LinearLayout inHorizontalScrollView;
-    EditText nameText;
-    EditText otherText;
-    String patientFolder;
+
     private String[] permissions = new String[]{"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.CAMERA"};
     Uri photoUri;
     ProgressDialog progressDialog;
     File reDirect;
-    ArrayList<String> resultList = new ArrayList(Arrays.asList(new String[]{"Biopsy needed", "Biopsy not needed"}));
-    Spinner resultSpinner;
+
     Button submitButton;
-    ArrayList<Uri> uploadedImageUri = new ArrayList<>();
-    Boolean saved = false;
-    Uri sessionUri;
-    StorageReference storageReferenceProfilePic;
+    TextView patientID;
     String searchUid;
     ArrayList<Integer> uids = new ArrayList<>();
 
+    ArrayList<String> uploadedImageUri = new ArrayList<>();
+    Boolean saved = false;
+    Uri sessionUri;
+    StorageReference storageReferenceProfilePic;
+
     ArrayAdapter gen;
-    ArrayAdapter dia;
-    ArrayAdapter re;
     String imageUris;
-    AppDatabase db;
+    String genderMini;
+
+    FirebaseFirestore db;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -100,16 +108,13 @@ public class CollectInformationActivity extends AppCompatActivity {
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
 
-        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "patients-database")
-                .fallbackToDestructiveMigration()
-                .build();
 
         nameText = findViewById(R.id.name);
         ageText = findViewById(R.id.age);
         cameraButton = findViewById(R.id.cameraButton);
         submitButton = findViewById(R.id.submitButton);
-        otherText = findViewById(R.id.otherEditText);
-        otherText.setVisibility(View.GONE);
+        phoneText = findViewById(R.id.patient_phone);
+        patientID = findViewById(R.id.patientID);
         hospital = getIntent().getStringExtra("hospital");
         doctor = getIntent().getStringExtra("doctor");
 
@@ -117,41 +122,6 @@ public class CollectInformationActivity extends AppCompatActivity {
             searchUid = getIntent().getStringExtra("uid");
             uids.add(Integer.parseInt(searchUid));
             final Integer[] arrUid = uids.toArray(new Integer[0]);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    List<Patient> patient = db.patientDao().loadAllByIds(arrUid);
-                    nameText.setText(patient.get(0).getName());
-                    ageText.setText(patient.get(0).getAge());
-                    int genderPos = gen.getPosition(patient.get(0).getGender());
-                    genderSpinner.setSelection(genderPos);
-
-                    if (dia.getPosition(patient.get(0).getDiagnosis()) != -1){
-                        int diaPos = dia.getPosition(patient.get(0).getDiagnosis());
-                        diagnosisSpinner.setSelection(diaPos);
-                    } else {
-                        diagnosisSpinner.setSelection(4);
-                        otherText.setText(patient.get(0).getDiagnosis());
-                    }
-                    int rePos = re.getPosition(patient.get(0).getResult());
-                    resultSpinner.setSelection(rePos);
-                    imageUris = patient.get(0).getImageUrls();
-                    String subimageUris = imageUris.substring(1, imageUris.length()-1);
-                    final String[] allImageUri = subimageUris.split(",");
-                    for(int i=0; i<allImageUri.length;i++){
-                        imagesUri.add(Uri.parse(allImageUri[i]));
-                        final int finalI = i;
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Log.e("image uri", allImageUri[finalI]);
-                                addImageView(inHorizontalScrollView, Uri.parse(allImageUri[finalI]));
-                            }
-                        });
-                    }
-
-                }
-            }).start();
         }
 
         genderSpinner = findViewById(R.id.genderSpinner);
@@ -159,18 +129,50 @@ public class CollectInformationActivity extends AppCompatActivity {
         gen.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         genderSpinner.setAdapter(gen);
 
-        diagnosisSpinner = findViewById(R.id.diagnosisSpinner);
-        dia = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, diagnosisList);
-        dia.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        diagnosisSpinner.setAdapter(dia);
+        nameText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-        resultSpinner = findViewById(R.id.resultSpinner);
-        re = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, resultList);
-        re.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        resultSpinner.setAdapter(re);
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                nameText.removeTextChangedListener(this);
+                patientID.setText("PatientID: " + nameText.getText());
+                nameText.setSelection(editable.length()); //moves the pointer to end
+                nameText.addTextChangedListener(this);
+            }
+        });
+
+        ageText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                ageText.removeTextChangedListener(this);
+                patientID.setText("PatientID: " + nameText.getText().toString().toUpperCase() + ageText.getText().toString());
+                ageText.setSelection(editable.length()); //moves the pointer to end
+                ageText.addTextChangedListener(this);
+            }
+        });
+
 
         inHorizontalScrollView = findViewById(R.id.inscroll_images);
         progressDialog = new ProgressDialog(this);
+
+        // Access a Cloud Firestore instance from your Activity
+        db = FirebaseFirestore.getInstance();
 
         if (Build.VERSION.SDK_INT >= 23) {
             if (!arePermissionsEnabled()) {
@@ -186,7 +188,7 @@ public class CollectInformationActivity extends AppCompatActivity {
                         requestMultiplePermissions();
                     }
 
-                    if (nameText.getText().toString().matches("") || ageText.getText().toString().matches("")) {
+                    if (nameText.getText().toString().matches("")) {
                         Toast.makeText(getApplicationContext(), "Name or Age is empty", Toast.LENGTH_SHORT).show();
                     } else {
                         Intent cam = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -213,115 +215,136 @@ public class CollectInformationActivity extends AppCompatActivity {
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String genderMini = genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F";
-                String resultMini = resultSpinner.getSelectedItem().toString() == "Biopsy needed" ? "B" : "NB";
+                genderMini = genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F";
                 String mainFolderName = "/OPC_" + hospital + "_" + doctor;
-                String subFolderName = nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderMini + "_" + (otherText.getText().toString().matches("") ? diagnosisSpinner.getSelectedItem() : otherText.getText()).toString().replaceAll("\\s+", "") + "_" + resultMini;
+                String subFolderName = nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderMini + "_" + phoneText.getText().toString();
 
                 if (nameText.getText().toString().matches("") || ageText.getText().toString().matches("")) {
                     Toast.makeText(getApplicationContext(), "Name or Age is empty", Toast.LENGTH_SHORT).show();
-                } else {
-                    String fileName = Environment.getExternalStorageDirectory() + mainFolderName + "/" + nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderSpinner.getSelectedItem().toString();
-                    File direct = new File(fileName);
-                    if (direct.exists()) {
-                        String fullPath = Environment.getExternalStorageDirectory() + mainFolderName + "/" + subFolderName;
-                        reDirect = new File(fullPath);
-                        direct.renameTo(reDirect);
-                    }
                 }
+//                else {
+//                    String fileName = Environment.getExternalStorageDirectory() + mainFolderName + "/" + nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderSpinner.getSelectedItem().toString();
+//                    File direct = new File(fileName);
+//                    if (direct.exists()) {
+//                        String fullPath = Environment.getExternalStorageDirectory() + mainFolderName + "/" + subFolderName;
+//                        reDirect = new File(fullPath);
+//                        direct.renameTo(reDirect);
+//                    }
+//                }
                 Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_SHORT).show();
+
+                uploadImage(mainFolderName, subFolderName, nameText.getText().toString(), ageText.getText().toString(), genderMini, phoneText.getText().toString());
+
+
+
                 nameText.setText("");
                 ageText.setText("");
+                phoneText.setText("");
+                patientID.setText("PatientID: ");
                 inHorizontalScrollView.removeAllViews();
                 genderSpinner.setSelection(0);
-                diagnosisSpinner.setSelection(0);
-                resultSpinner.setSelection(0);
-                otherText.setText("");
-                otherText.setVisibility(View.GONE);
                 imagesUri.clear();
-            }
-        });
-
-        diagnosisSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (i == 4) {
-                    otherText.setVisibility(View.VISIBLE);
-                } else {
-                    otherText.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
 
     }
 
-//    private void uploadImage(String mainFolder, String patientFolder) {
-//        storageReferenceProfilePic = FirebaseStorage.getInstance().getReference();
-//        for (int i = 0; i < this.imagesUri.size(); i++) {
-//            String name = mainFolder + "/" + patientFolder + "/" + imageName.get(i) + ".jpg";
-//            final StorageReference ref = storageReferenceProfilePic.child(name);
-//            UploadTask uploadTask = ref.putFile(imagesUri.get(i), new StorageMetadata.Builder().build(), sessionUri);
-//
-//            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//                @Override
-//                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                    progressDialog.dismiss();
-//                }
-//            })
-//            .addOnFailureListener(new OnFailureListener() {
-//                @Override
-//                public void onFailure(@NonNull Exception e) {
-//                    progressDialog.dismiss();
-//                }
-//            })
-//            .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-//                @Override
-//                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-//                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-//
-//                    //displaying percentage in progress dialog
-//                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
-//                    sessionUri = taskSnapshot.getUploadSessionUri();
-//                    if (sessionUri != null && !saved) {
-//                        saved = true;
-//                        // A persisted session has begun with the server.
-//                        // Save this to persistent storage in case the process dies.
-//                    }
-//                }
-//            });
-//
-//            Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-//                @Override
-//                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-//                    if (!task.isSuccessful()) {
-//                        throw task.getException();
-//                    }
-//
-//                    // Continue with the task to get the download URL
-//                    return ref.getDownloadUrl();
-//                }
-//            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-//                @Override
-//                public void onComplete(@NonNull Task<Uri> task) {
-//                    if (task.isSuccessful()) {
-//                        Uri downloadUri = task.getResult();
-//                        uploadedImageUri.add(downloadUri);
-//                        Log.e("URL", ""+uploadedImageUri);
-//                    } else {
-//                        // Handle failures
-//                        // ...
-//                    }
-//                }
-//            });
-//
-//        }
-//    }
+    private void uploadImage(String mainFolder, String patientFolder, final String patientName, final String age, final String gender, final String phone) {
+        storageReferenceProfilePic = FirebaseStorage.getInstance().getReference();
+        for (int i = 0; i < this.imagesUri.size(); i++) {
+            String name = mainFolder + "/" + patientFolder + "/" + imageName.get(i) + ".jpg";
+            final StorageReference ref = storageReferenceProfilePic.child(name);
+            UploadTask uploadTask = ref.putFile(imagesUri.get(i), new StorageMetadata.Builder().build(), sessionUri);
 
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    progressDialog.dismiss();
+                }
+            })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    progressDialog.dismiss();
+                }
+            })
+            .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+
+                    //displaying percentage in progress dialog
+                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
+                    sessionUri = taskSnapshot.getUploadSessionUri();
+                    if (sessionUri != null && !saved) {
+                        saved = true;
+                        // A persisted session has begun with the server.
+                        // Save this to persistent storage in case the process dies.
+                    }
+                }
+            });
+
+            Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+
+                    // Continue with the task to get the download URL
+                    return ref.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.isSuccessful()) {
+                        Uri downloadUri = task.getResult();
+                        assert downloadUri != null;
+                        uploadedImageUri.add(downloadUri.toString());
+                        Log.e("Name", ""+patientName);
+                        Log.e("URL", ""+uploadedImageUri);
+                        uploadToDatabase(patientName, age, gender, phone, uploadedImageUri);
+
+                    } else {
+                        // Handle failures
+                        // ...
+                    }
+                }
+            });
+
+        }
+    }
+
+    private void uploadToDatabase(String name, String age, String gender, String phone, ArrayList urls){
+
+
+        PatientModel patient = new PatientModel(name, age, gender, phone, urls);
+
+//        Map<String, Object> patient = new HashMap<>();
+//        patient.put("name", name);
+//        patient.put("age", age);
+//        patient.put("gender", gender);
+//        patient.put("phone", phone);
+//        patient.put("imageUrls", urls);
+
+//        Log.e("upload", "uploadToDatabase:" + name.toUpperCase() +age);
+
+        db.collection("patientstest").document(name.toUpperCase() +age)
+                .set(patient)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("dataset", "DocumentSnapshot added");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("dataset", "Error adding document", e);
+                        Toast.makeText(getApplicationContext(), "Upload Failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
     private File createImageFile(String name, String age, String gender) throws IOException {
         String currentDateandTime = new SimpleDateFormat("dd-MM-yyyy:HH:mm:ss").format(new Date());
         String timeStamp = name + "_" + age + "_" + gender + "_" + currentDateandTime;

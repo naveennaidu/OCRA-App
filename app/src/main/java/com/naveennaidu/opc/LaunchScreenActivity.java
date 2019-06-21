@@ -24,8 +24,6 @@ public class LaunchScreenActivity extends AppCompatActivity {
     Button saveButton;
     Button detectButton;
 
-    EditText uidText;
-    Button searchButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,12 +38,6 @@ public class LaunchScreenActivity extends AppCompatActivity {
         saveButton = findViewById(R.id.saveButton);
         changeNameButton = findViewById(R.id.changeButton);
         changeNameButton.setVisibility(View.GONE);
-
-        oldPatient.setVisibility(View.GONE);
-        uidText = findViewById(R.id.uidText);
-        searchButton = findViewById(R.id.searchButton);
-        uidText.setVisibility(View.GONE);
-        searchButton.setVisibility(View.GONE);
 
         detectButton = findViewById(R.id.detection_buttton);
 
@@ -78,30 +70,11 @@ public class LaunchScreenActivity extends AppCompatActivity {
         oldPatient.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                uidText.setVisibility(View.VISIBLE);
-                searchButton.setVisibility(View.VISIBLE);
-                oldPatient.setVisibility(View.GONE);
-            }
-        });
-
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String uid = uidText.getText().toString();
-
-                Intent goToOldPatient = new Intent(LaunchScreenActivity.this, CollectInformationActivity.class);
-                goToOldPatient.putExtra("hospital", hosp);
-                goToOldPatient.putExtra("doctor", doc);
-                goToOldPatient.putExtra("uid", uid);
+                Intent goToOldPatient = new Intent(LaunchScreenActivity.this, PatientDatabaseActivity.class);
                 startActivity(goToOldPatient);
-
-                uidText.setText("");
-                uidText.setVisibility(View.GONE);
-                searchButton.setVisibility(View.GONE);
-                oldPatient.setVisibility(View.VISIBLE);
-
             }
         });
+
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
