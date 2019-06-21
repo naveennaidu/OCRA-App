@@ -56,7 +56,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         myViewHolder.phone.setText(patient.getPhone());
 
         // loading album cover using Glide library
-        Glide.with(mContext).load(patient.getThumbnail()).into(myViewHolder.thumbnail);
+        Glide.with(mContext).load(patient.getThumbnail().get(0)).into(myViewHolder.thumbnail);
 
         myViewHolder.thumbnail.setOnClickListener(new View.OnClickListener() {
             @Override

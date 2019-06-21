@@ -1,17 +1,19 @@
 package com.naveennaidu.opc;
 
+import java.util.ArrayList;
+
 public class PatientModel {
     private String patientName;
     private String patientAge;
     private String patientGender;
     private String patientPhone;
-    private int thumbnail;
+    private ArrayList<String> thumbnail;
 
     public PatientModel(){
 
     }
 
-    public PatientModel(String name, String age, String gender, String phone, int thumbnail){
+    public PatientModel(String name, String age, String gender, String phone, ArrayList<String> thumbnail){
         this.patientName = name;
         this.patientAge = age;
         this.patientGender = gender;
@@ -51,11 +53,11 @@ public class PatientModel {
         this.patientPhone = phone;
     }
 
-    public int getThumbnail() {
+    public ArrayList<String> getThumbnail() {
         return thumbnail;
     }
 
-    public void setName(int thumbnail) {
+    public void setThumbnail(ArrayList<String> thumbnail) {
         this.thumbnail = thumbnail;
     }
 

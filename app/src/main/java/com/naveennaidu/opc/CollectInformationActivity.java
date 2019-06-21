@@ -316,16 +316,20 @@ public class CollectInformationActivity extends AppCompatActivity {
     }
 
     private void uploadToDatabase(String name, String age, String gender, String phone, ArrayList urls){
-        // Create a new patient with a first and last name
-        Map<String, Object> patient = new HashMap<>();
-        patient.put("name", name);
-        patient.put("age", age);
-        patient.put("gender", gender);
-        patient.put("phone", phone);
-        patient.put("imageUrls", urls);
 
-        Log.e("upload", "uploadToDatabase:" + name.toUpperCase() +age);
-        db.collection("patients").document(name.toUpperCase() +age)
+
+        PatientModel patient = new PatientModel(name, age, gender, phone, urls);
+
+//        Map<String, Object> patient = new HashMap<>();
+//        patient.put("name", name);
+//        patient.put("age", age);
+//        patient.put("gender", gender);
+//        patient.put("phone", phone);
+//        patient.put("imageUrls", urls);
+
+//        Log.e("upload", "uploadToDatabase:" + name.toUpperCase() +age);
+
+        db.collection("patientstest").document(name.toUpperCase() +age)
                 .set(patient)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
