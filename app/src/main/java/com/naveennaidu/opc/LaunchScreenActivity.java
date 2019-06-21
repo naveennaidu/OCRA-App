@@ -13,10 +13,10 @@ import android.widget.Toast;
 public class LaunchScreenActivity extends AppCompatActivity {
 
     Button changeNameButton;
-    String doc;
+//    String doc;
     EditText doctorName;
     String doctorNameText;
-    String hosp;
+//    String hosp;
     EditText hospitalName;
     String hospitalNameText;
     Button newPatient;
@@ -41,28 +41,28 @@ public class LaunchScreenActivity extends AppCompatActivity {
 
         detectButton = findViewById(R.id.detection_buttton);
 
-        SharedPreferences preferences = getSharedPreferences("LOGIN", 0);
-        hosp = preferences.getString("hosp", "");
-        doc = preferences.getString("doc", "");
+//        SharedPreferences preferences = getSharedPreferences("LOGIN", 0);
+//        hosp = preferences.getString("hosp", "");
+//        doc = preferences.getString("doc", "");
 
-        if (!(hosp.matches("") || doc.matches(""))) {
-            hospitalName.setVisibility(View.GONE);
-            doctorName.setVisibility(View.GONE);
-            saveButton.setVisibility(View.GONE);
-            changeNameButton.setVisibility(View.VISIBLE);
-        }
+//        if (!(hosp.matches("") || doc.matches(""))) {
+//            hospitalName.setVisibility(View.GONE);
+//            doctorName.setVisibility(View.GONE);
+//            saveButton.setVisibility(View.GONE);
+//            changeNameButton.setVisibility(View.VISIBLE);
+//        }
 
         newPatient.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (hosp.matches("") || doc.matches("")) {
-                    Toast.makeText(getApplicationContext(), "Hospital or Doctor name is empty", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+//                if (hosp.matches("") || doc.matches("")) {
+//                    Toast.makeText(getApplicationContext(), "Hospital or Doctor name is empty", Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
                 Intent goToNewPatient = new Intent(LaunchScreenActivity.this, CollectInformationActivity.class);
 
-                goToNewPatient.putExtra("hospital", hosp);
-                goToNewPatient.putExtra("doctor", doc);
+//                goToNewPatient.putExtra("hospital", hosp);
+//                goToNewPatient.putExtra("doctor", doc);
                 startActivity(goToNewPatient);
             }
         });
@@ -87,8 +87,8 @@ public class LaunchScreenActivity extends AppCompatActivity {
                 editor.putString("doc", doctorNameText);
                 editor.apply();
 
-                hosp = hospitalNameText;
-                doc = doctorNameText;
+//                hosp = hospitalNameText;
+//                doc = doctorNameText;
                 hospitalName.setVisibility(View.GONE);
                 doctorName.setVisibility(View.GONE);
                 saveButton.setVisibility(View.GONE);
@@ -104,15 +104,15 @@ public class LaunchScreenActivity extends AppCompatActivity {
                 doctorName.setVisibility(View.VISIBLE);
                 saveButton.setVisibility(View.VISIBLE);
                 changeNameButton.setVisibility(View.GONE);
-                hospitalName.setText(hosp);
-                doctorName.setText(doc);
+//                hospitalName.setText(hosp);
+//                doctorName.setText(doc);
                 hospitalNameText = hospitalName.getText().toString();
                 doctorNameText = doctorName.getText().toString();
-                SharedPreferences.Editor editor = getSharedPreferences("LOGIN", 0).edit();
-
-                editor.putString("hosp", hospitalNameText);
-                editor.putString("doc", doctorNameText);
-                editor.apply();
+//                SharedPreferences.Editor editor = getSharedPreferences("LOGIN", 0).edit();
+//
+//                editor.putString("hosp", hospitalNameText);
+//                editor.putString("doc", doctorNameText);
+//                editor.apply();
                 ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(doctorName.getWindowToken(), 0);
             }
         });

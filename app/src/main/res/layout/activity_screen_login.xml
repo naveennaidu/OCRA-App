@@ -23,8 +23,8 @@
         android:layout_marginRight="10dp"
         android:layout_marginBottom="10dp"
         android:ems="10"
-        android:inputType="textPersonName"
-        android:text="Name" />
+        android:hint="Name"
+        android:inputType="textPersonName" />
 
     <EditText
         android:id="@+id/capturerOrg"
@@ -32,14 +32,14 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:ems="10"
-        android:inputType="textPersonName"
-        android:text="Organization" />
+        android:hint="Organization"
+        android:inputType="textPersonName" />
 
     <Button
         android:id="@+id/loginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="40dp"
-        android:layout_marginRight="40dp"
+        android:layout_marginRight="20dp"
         android:text="LOGIN" />
 </LinearLayout>
