@@ -1,5 +1,6 @@
 package com.naveennaidu.opc;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
@@ -15,14 +16,15 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class LaunchScreenActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     Button newPatient;
     Button oldPatient;
-
-
+    String cName;
+    String cOrg;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,13 +37,16 @@ public class LaunchScreenActivity extends AppCompatActivity implements Navigatio
         newPatient = findViewById(R.id.newPatient);
         oldPatient = findViewById(R.id.oldPatient);
 
+        SharedPreferences preferences = getSharedPreferences("LOGIN", 0);
+        cName = preferences.getString("savedCapturerName", "");
+        cOrg = preferences.getString("SavedCapturerOrg", "");
 
         newPatient.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
             Intent goToNewPatient = new Intent(LaunchScreenActivity.this, CollectInformationActivity.class);
-            goToNewPatient.putExtra("hospital", getIntent().getStringExtra("capturerOrg"));
-            goToNewPatient.putExtra("doctor", getIntent().getStringExtra("capturerName"));
+            goToNewPatient.putExtra("hospital", cOrg);
+            goToNewPatient.putExtra("doctor", cName);
             startActivity(goToNewPatient);
             }
         });
@@ -60,6 +65,14 @@ public class LaunchScreenActivity extends AppCompatActivity implements Navigatio
         toggle.syncState();
 
         NavigationView navigationView = findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
+
+        TextView capName = headerView.findViewById(R.id.name);
+        capName.setText(cName);
+
+        TextView capOrg = headerView.findViewById(R.id.organization);
+        capOrg.setText(cOrg);
+
         navigationView.setNavigationItemSelectedListener(this);
     }
 
@@ -78,6 +91,10 @@ public class LaunchScreenActivity extends AppCompatActivity implements Navigatio
         if (id == R.id.nav_logout) {
             Intent logout = new Intent(this, LoginScreenActivity.class);
             startActivity(logout);
+
+            SharedPreferences.Editor editor = getSharedPreferences("LOGIN", 0).edit();
+            editor.clear();
+            editor.apply();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
