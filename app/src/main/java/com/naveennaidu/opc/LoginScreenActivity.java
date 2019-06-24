@@ -12,7 +12,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
+
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -78,6 +78,13 @@ public class LoginScreenActivity extends AppCompatActivity implements Navigation
         cName = preferences.getString("savedCapturerName", "");
         cOrg = preferences.getString("SavedCapturerOrg", "");
 
+        if (!(cName.matches("") || cOrg.matches(""))) {
+            Intent goToHomeScreen = new Intent(LoginScreenActivity.this, LaunchScreenActivity.class);
+
+            goToHomeScreen.putExtra("capturerName", savedCapturerName);
+            goToHomeScreen.putExtra("capturerOrg", SavedCapturerOrg);
+            startActivity(goToHomeScreen);
+        }
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
