@@ -6,18 +6,16 @@ public class PatientModel {
     private String patientName;
     private String patientAge;
     private String patientGender;
-    private String patientPhone;
     private ArrayList<String> thumbnail;
 
     public PatientModel(){
 
     }
 
-    public PatientModel(String name, String age, String gender, String phone, ArrayList<String> thumbnail){
+    public PatientModel(String name, String age, String gender, ArrayList<String> thumbnail){
         this.patientName = name;
         this.patientAge = age;
         this.patientGender = gender;
-        this.patientPhone = phone;
         this.thumbnail = thumbnail;
     }
 
@@ -43,14 +41,6 @@ public class PatientModel {
 
     public void setGender(String gender) {
         this.patientGender = gender;
-    }
-
-    public String getPhone() {
-        return patientPhone;
-    }
-
-    public void setPhone(String phone) {
-        this.patientPhone = phone;
     }
 
     public ArrayList<String> getThumbnail() {

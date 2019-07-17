@@ -1,7 +1,7 @@
 package com.naveennaidu.opc;
 
-import android.app.Activity;
-import android.content.Context;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,21 +15,21 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.Toast;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,9 +42,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.Random;
 
 public class ImageAnnotationActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener {
@@ -52,6 +51,12 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
     ImageView annotationImageView;
     Button saveButton;
     Button undoButton;
+    Button assessButton;
+    TextView assessText;
+
+    ArrayList<String> labelList = new ArrayList(Arrays.asList(new String[]{"Other low Malignancy risk", "Traumatic Ulcer", "Lichen Planus", "Leukoplakia: homogeneous", "Leukoplakia: non-homogeneous", "Erythroplakia", "Likely malignant"}));
+    Spinner labelSpinner;
+    ArrayAdapter lab;
 
     Bitmap bmp;
     Bitmap alteredBitmap;
@@ -93,9 +98,21 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
         setTitle("Image Annotation");
         setContentView(R.layout.activity_annotation_image);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         annotationImageView = findViewById(R.id.annotationImageView);
         saveButton = findViewById(R.id.saveButton);
         undoButton = findViewById(R.id.undoButton);
+
+        assessButton = findViewById(R.id.assessButton);
+        assessText = findViewById(R.id.assessText);
+
+        labelSpinner = findViewById(R.id.labelSpinner);
+        lab = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, labelList);
+        lab.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        labelSpinner.setAdapter(lab);
+
 
         saveButton.setOnClickListener(this);
         undoButton.setOnClickListener(this);
@@ -382,5 +399,37 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
         Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
         img.recycle();
         return rotatedImg;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.close_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.close_button) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Do you want to close the window?");
+            builder.setMessage("You are about to delete the image. Do you really want to proceed ?");
+            builder.setCancelable(false);
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    finish();
+                }
+            });
+
+            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+
+            builder.show();
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -1,6 +1,8 @@
 package com.naveennaidu.opc;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
@@ -89,12 +91,32 @@ public class LaunchScreenActivity extends AppCompatActivity implements Navigatio
         }
 
         if (id == R.id.nav_logout) {
-            Intent logout = new Intent(this, LoginScreenActivity.class);
-            startActivity(logout);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Do you want to Log-Out?");
+            builder.setMessage("You are about to logout of your account. Do you really want to proceed ?");
+            builder.setCancelable(false);
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent logout = new Intent(LaunchScreenActivity.this, LoginScreenActivity.class);
+                    startActivity(logout);
 
-            SharedPreferences.Editor editor = getSharedPreferences("LOGIN", 0).edit();
-            editor.clear();
-            editor.apply();
+                    SharedPreferences.Editor editor = getSharedPreferences("LOGIN", 0).edit();
+                    editor.clear();
+                    editor.apply();
+                }
+            });
+
+            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+
+            builder.show();
+
+
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

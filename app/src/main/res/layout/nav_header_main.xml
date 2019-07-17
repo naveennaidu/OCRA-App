@@ -28,14 +28,17 @@
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/nav_header_vertical_spacing"
             android:text="Name"
+            android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:textColor="#FFFFFF" />
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/organization"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Org"
+            android:textAllCaps="true"
             android:textColor="#FFFFFF" />
 
     </LinearLayout>

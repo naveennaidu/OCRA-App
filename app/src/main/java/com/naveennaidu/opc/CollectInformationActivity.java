@@ -66,10 +66,9 @@ public class CollectInformationActivity extends AppCompatActivity {
 
     EditText nameText;
     EditText ageText;
-    ImageButton cameraButton;
-    ArrayList<String> genderList = new ArrayList(Arrays.asList(new String[]{"Male", "Female"}));
+    Button cameraButton;
+    ArrayList<String> genderList = new ArrayList(Arrays.asList(new String[]{"Male", "Female", "Other"}));
     Spinner genderSpinner;
-    EditText phoneText;
 
     String doctor;
     Uri file;
@@ -85,7 +84,6 @@ public class CollectInformationActivity extends AppCompatActivity {
     File reDirect;
 
     Button submitButton;
-    TextView patientID;
     String searchUid;
     ArrayList<Integer> uids = new ArrayList<>();
 
@@ -106,6 +104,9 @@ public class CollectInformationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_information_collect);
         setTitle("Patient Information");
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
 
@@ -114,8 +115,6 @@ public class CollectInformationActivity extends AppCompatActivity {
         ageText = findViewById(R.id.age);
         cameraButton = findViewById(R.id.cameraButton);
         submitButton = findViewById(R.id.submitButton);
-        phoneText = findViewById(R.id.patient_phone);
-        patientID = findViewById(R.id.patientID);
         hospital = getIntent().getStringExtra("hospital");
         doctor = getIntent().getStringExtra("doctor");
 
@@ -143,7 +142,6 @@ public class CollectInformationActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 nameText.removeTextChangedListener(this);
-                patientID.setText("PatientID: " + nameText.getText());
                 nameText.setSelection(editable.length()); //moves the pointer to end
                 nameText.addTextChangedListener(this);
             }
@@ -162,7 +160,6 @@ public class CollectInformationActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 ageText.removeTextChangedListener(this);
-                patientID.setText("PatientID: " + nameText.getText().toString().toUpperCase() + ageText.getText().toString());
                 ageText.setSelection(editable.length()); //moves the pointer to end
                 ageText.addTextChangedListener(this);
             }
@@ -218,7 +215,7 @@ public class CollectInformationActivity extends AppCompatActivity {
             public void onClick(View view) {
                 genderMini = genderSpinner.getSelectedItem().toString() == "Male" ? "M" : "F";
                 String mainFolderName = "/OPC_" + hospital + "_" + doctor;
-                String subFolderName = nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderMini + "_" + phoneText.getText().toString();
+                String subFolderName = nameText.getText().toString() + "_" + ageText.getText().toString() + "_" + genderMini;
 
                 if (nameText.getText().toString().matches("") || ageText.getText().toString().matches("")) {
                     Toast.makeText(getApplicationContext(), "Name or Age is empty", Toast.LENGTH_SHORT).show();
@@ -234,14 +231,12 @@ public class CollectInformationActivity extends AppCompatActivity {
 //                }
                 Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_SHORT).show();
 
-                uploadImage(mainFolderName, subFolderName, nameText.getText().toString(), ageText.getText().toString(), genderMini, phoneText.getText().toString());
+                uploadImage(mainFolderName, subFolderName, nameText.getText().toString(), ageText.getText().toString(), genderMini);
 
 
 
                 nameText.setText("");
                 ageText.setText("");
-                phoneText.setText("");
-                patientID.setText("PatientID: ");
                 inHorizontalScrollView.removeAllViews();
                 genderSpinner.setSelection(0);
                 imagesUri.clear();
@@ -250,7 +245,7 @@ public class CollectInformationActivity extends AppCompatActivity {
 
     }
 
-    private void uploadImage(String mainFolder, String patientFolder, final String patientName, final String age, final String gender, final String phone) {
+    private void uploadImage(String mainFolder, String patientFolder, final String patientName, final String age, final String gender) {
         storageReferenceProfilePic = FirebaseStorage.getInstance().getReference();
         for (int i = 0; i < this.imagesUri.size(); i++) {
             String name = mainFolder + "/" + patientFolder + "/" + imageName.get(i) + ".jpg";
@@ -304,7 +299,7 @@ public class CollectInformationActivity extends AppCompatActivity {
                         uploadedImageUri.add(downloadUri.toString());
                         Log.e("Name", ""+patientName);
                         Log.e("URL", ""+uploadedImageUri);
-                        uploadToDatabase(patientName, age, gender, phone, uploadedImageUri);
+                        uploadToDatabase(patientName, age, gender, uploadedImageUri);
 
                     } else {
                         // Handle failures
@@ -316,10 +311,10 @@ public class CollectInformationActivity extends AppCompatActivity {
         }
     }
 
-    private void uploadToDatabase(String name, String age, String gender, String phone, ArrayList urls){
+    private void uploadToDatabase(String name, String age, String gender, ArrayList urls){
 
 
-        PatientModel patient = new PatientModel(name, age, gender, phone, urls);
+        PatientModel patient = new PatientModel(name, age, gender, urls);
 
 //        Map<String, Object> patient = new HashMap<>();
 //        patient.put("name", name);
@@ -459,7 +454,26 @@ public class CollectInformationActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.close_button) {
-            finish();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Do you want to close the window?");
+            builder.setMessage("You are about to delete all records of form. Do you really want to proceed ?");
+            builder.setCancelable(false);
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    finish();
+                }
+            });
+
+            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+
+            builder.show();
         }
         return super.onOptionsItemSelected(item);
     }

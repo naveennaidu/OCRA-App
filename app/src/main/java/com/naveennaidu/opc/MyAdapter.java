@@ -53,7 +53,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         myViewHolder.name.setText(patient.getName());
         myViewHolder.age.setText(patient.getAge());
         myViewHolder.gender.setText(patient.getGender());
-        myViewHolder.phone.setText(patient.getPhone());
 
         // loading album cover using Glide library
         Glide.with(mContext).load(patient.getThumbnail().get(0)).into(myViewHolder.thumbnail);
