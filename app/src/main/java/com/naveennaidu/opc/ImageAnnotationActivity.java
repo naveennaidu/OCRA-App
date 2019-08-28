@@ -54,7 +54,7 @@ public class ImageAnnotationActivity extends AppCompatActivity implements View.O
     Button assessButton;
     TextView assessText;
 
-    ArrayList<String> labelList = new ArrayList(Arrays.asList(new String[]{"Other low Malignancy risk", "Traumatic Ulcer", "Lichen Planus", "Leukoplakia: homogeneous", "Leukoplakia: non-homogeneous", "Erythroplakia", "Likely malignant"}));
+    ArrayList<String> labelList = new ArrayList(Arrays.asList(new String[]{"Other low Malignancy risk", "Traumatic Ulcer", "Lichen Planus","Submucous Fibrosis", "Leukoplakia: homogeneous", "Leukoplakia: non-homogeneous", "Erythroplakia", "Likely malignant"}));
     Spinner labelSpinner;
     ArrayAdapter lab;
 

@@ -87,40 +87,60 @@
                 android:orientation="vertical">
 
                 <CheckBox
-                    android:id="@+id/checkBox"
+                    android:id="@+id/checkBox_tobocco"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:onClick="onCheckboxClicked"
                     android:text="Chewing Tobocco" />
 
                 <CheckBox
-                    android:id="@+id/checkBox2"
+                    android:id="@+id/checkBox_betel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:onClick="onCheckboxClicked"
                     android:text="Chewing Betel Nut" />
 
                 <CheckBox
-                    android:id="@+id/checkBox6"
+                    android:id="@+id/checkBox_smoking"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:onClick="onCheckboxClicked"
                     android:text="Smoking" />
 
                 <CheckBox
-                    android:id="@+id/checkBox3"
+                    android:id="@+id/checkBox_alcohol"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:onClick="onCheckboxClicked"
                     android:text="Alcohol( >2/week)" />
 
                 <CheckBox
-                    android:id="@+id/checkBox4"
+                    android:id="@+id/checkBox_hpv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:onClick="onCheckboxClicked"
                     android:text="Oral HPV" />
 
                 <CheckBox
-                    android:id="@+id/checkBox5"
+                    android:id="@+id/checkBox_lesion_history"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:onClick="onCheckboxClicked"
                     android:text="Oral Lesion History" />
+
+                <CheckBox
+                    android:id="@+id/checkBox_artificial_tooth"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="onCheckboxClicked"
+                    android:text="Artificial Tooth" />
+
+                <CheckBox
+                    android:id="@+id/checkBox_family_history"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="onCheckboxClicked"
+                    android:text="Family History" />
             </LinearLayout>
 
             <HorizontalScrollView

@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -93,11 +94,11 @@ public class CollectInformationActivity extends AppCompatActivity {
     StorageReference storageReferenceProfilePic;
 
     ArrayAdapter gen;
-    String imageUris;
     String genderMini;
 
     FirebaseFirestore db;
 
+    CheckBox cb1, cb2, cb3, cb4, cb5, cb6, cb7, cb8;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,6 +118,15 @@ public class CollectInformationActivity extends AppCompatActivity {
         submitButton = findViewById(R.id.submitButton);
         hospital = getIntent().getStringExtra("hospital");
         doctor = getIntent().getStringExtra("doctor");
+
+        cb1 = findViewById(R.id.checkBox_tobocco);
+        cb2 = findViewById(R.id.checkBox_betel);
+        cb3 = findViewById(R.id.checkBox_smoking);
+        cb4 = findViewById(R.id.checkBox_alcohol);
+        cb5 = findViewById(R.id.checkBox_hpv);
+        cb6 = findViewById(R.id.checkBox_lesion_history);
+        cb7 = findViewById(R.id.checkBox_artificial_tooth);
+        cb8 = findViewById(R.id.checkBox_family_history);
 
         if (getIntent().getExtras().containsKey("uid")){
             searchUid = getIntent().getStringExtra("uid");
@@ -177,6 +187,7 @@ public class CollectInformationActivity extends AppCompatActivity {
                 requestMultiplePermissions();
             }
         }
+
 
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -239,11 +250,104 @@ public class CollectInformationActivity extends AppCompatActivity {
                 ageText.setText("");
                 inHorizontalScrollView.removeAllViews();
                 genderSpinner.setSelection(0);
+                if (cb1.isChecked()) {
+                    cb1.setChecked(false);
+                }
+                if (cb2.isChecked()) {
+                    cb2.setChecked(false);
+                }
+                if (cb2.isChecked()) {
+                    cb2.setChecked(false);
+                }
+                if (cb3.isChecked()) {
+                    cb3.setChecked(false);
+                }
+                if (cb4.isChecked()) {
+                    cb4.setChecked(false);
+                }
+                if (cb5.isChecked()) {
+                    cb5.setChecked(false);
+                }
+                if (cb6.isChecked()) {
+                    cb6.setChecked(false);
+                }
+                if (cb7.isChecked()) {
+                    cb7.setChecked(false);
+                }
+                if (cb8.isChecked()) {
+                    cb8.setChecked(false);
+                }
                 imagesUri.clear();
             }
         });
 
     }
+
+    public void onCheckboxClicked(View view) {
+        // Is the view now checked?
+        boolean checked = ((CheckBox) view).isChecked();
+
+        // Check which checkbox was clicked
+        switch(view.getId()) {
+            case R.id.checkBox_tobocco:
+                if (checked) {
+
+                } else {
+
+                    break;
+                }
+            case R.id.checkBox_betel:
+                if (checked) {
+
+                } else {
+
+                    break;
+                }
+            case R.id.checkBox_smoking:
+                if (checked) {
+
+                } else {
+
+                    break;
+                }
+            case R.id.checkBox_alcohol:
+                if (checked) {
+
+                } else {
+
+                    break;
+                }
+            case R.id.checkBox_hpv:
+                if (checked) {
+
+                } else {
+
+                    break;
+                }
+            case R.id.checkBox_lesion_history:
+                if (checked) {
+
+                } else {
+
+                    break;
+                }
+            case R.id.checkBox_artificial_tooth:
+                if (checked) {
+
+                } else {
+
+                    break;
+                }
+            case R.id.checkBox_family_history:
+                if (checked) {
+
+                } else {
+
+                    break;
+                }
+        }
+    }
+
 
     private void uploadImage(String mainFolder, String patientFolder, final String patientName, final String age, final String gender) {
         storageReferenceProfilePic = FirebaseStorage.getInstance().getReference();
@@ -454,26 +558,30 @@ public class CollectInformationActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.close_button) {
+            if (!nameText.getText().toString().matches("")) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Do you want to close the window?");
+                builder.setMessage("You are about to delete all records of form. Do you really want to proceed ?");
+                builder.setCancelable(false);
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                });
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Do you want to close the window?");
-            builder.setMessage("You are about to delete all records of form. Do you really want to proceed ?");
-            builder.setCancelable(false);
-            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    finish();
-                }
-            });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 
-            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
 
-                }
-            });
+                builder.show();
+            } else {
+                finish();
+            }
 
-            builder.show();
         }
         return super.onOptionsItemSelected(item);
     }
